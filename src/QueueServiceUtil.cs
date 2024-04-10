@@ -1,41 +1,31 @@
 ﻿using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Azure.Core.Pipeline;
 using Azure.Storage.Queues;
 using Microsoft.Extensions.Configuration;
 using Soenneker.Extensions.Configuration;
+using Soenneker.Extensions.ValueTask;
 using Soenneker.Queue.Service.Abstract;
 using Soenneker.Utils.AsyncSingleton;
+using Soenneker.Utils.HttpClientCache.Abstract;
 
 namespace Soenneker.Queue.Service;
 
 ///<inheritdoc cref="IQueueServiceUtil"/>
 public class QueueServiceUtil : IQueueServiceUtil
 {
+    private readonly IHttpClientCache _httpClientCache;
     private readonly AsyncSingleton<QueueServiceClient> _client;
-    private readonly AsyncSingleton<HttpClient> _httpClient;
 
-    public QueueServiceUtil(IConfiguration config)
+    public QueueServiceUtil(IConfiguration config, IHttpClientCache httpClientCache)
     {
-        _httpClient = new AsyncSingleton<HttpClient>(() =>
-        {
-            var socketsHandler = new SocketsHttpHandler
-            {
-                PooledConnectionLifetime = TimeSpan.FromMinutes(10),
-                MaxConnectionsPerServer = 20
-            };
-
-            var httpClient = new HttpClient(socketsHandler);
-
-            return httpClient;
-        });
+        _httpClientCache = httpClientCache;
 
         _client = new AsyncSingleton<QueueServiceClient>(async () =>
         {
             var clientOptions = new QueueClientOptions
             {
-                Transport = new HttpClientTransport(await _httpClient.Get())
+                Transport = new HttpClientTransport(await httpClientCache.Get(nameof(QueueServiceClient)))
             };
 
             var connectionString = config.GetValueStrict<string>("Azure:Storage:Queue:ConnectionString");
@@ -46,7 +36,7 @@ public class QueueServiceUtil : IQueueServiceUtil
         });
     }
 
-    public ValueTask<QueueServiceClient> GetClient()
+    public ValueTask<QueueServiceClient> Get()
     {
         return _client.Get();
     }
@@ -55,16 +45,17 @@ public class QueueServiceUtil : IQueueServiceUtil
     {
         GC.SuppressFinalize(this);
 
-        await _httpClient.DisposeAsync().ConfigureAwait(false);
+        await _httpClientCache.Remove(nameof(QueueServiceClient)).NoSync();
 
-        await _client.DisposeAsync().ConfigureAwait(false);
+        await _client.DisposeAsync().NoSync();
     }
 
     public void Dispose()
     {
         GC.SuppressFinalize(this);
 
+        _httpClientCache.RemoveSync(nameof(QueueServiceClient));
+
         _client.Dispose();
-        _httpClient.Dispose();
     }
 }

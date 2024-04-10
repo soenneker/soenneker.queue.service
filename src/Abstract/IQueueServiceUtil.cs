@@ -12,5 +12,5 @@ namespace Soenneker.Queue.Service.Abstract;
 public interface IQueueServiceUtil : IDisposable, IAsyncDisposable
 {
     [Pure]
-    ValueTask<QueueServiceClient> GetClient();
+    ValueTask<QueueServiceClient> Get();
 }

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Soenneker.Queue.Service.Abstract;
+using Soenneker.Utils.HttpClientCache.Registrar;
 
 namespace Soenneker.Queue.Service.Registrars;
 
@@ -14,11 +15,13 @@ public static class QueueServiceUtilRegistrar
     /// </summary>
     public static void AddQueueServiceUtilAsSingleton(this IServiceCollection services)
     {
+        services.AddHttpClientCache();
         services.TryAddSingleton<IQueueServiceUtil, QueueServiceUtil>();
     }
 
     public static void AddQueueServiceUtilAsScoped(this IServiceCollection services)
     {
+        services.AddHttpClientCache();
         services.TryAddScoped<IQueueServiceUtil, QueueServiceUtil>();
     }
 }
