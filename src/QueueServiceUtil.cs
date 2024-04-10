@@ -23,12 +23,12 @@ public class QueueServiceUtil : IQueueServiceUtil
 
         _client = new AsyncSingleton<QueueServiceClient>(async () =>
         {
+            var connectionString = config.GetValueStrict<string>("Azure:Storage:Queue:ConnectionString");
+
             var clientOptions = new QueueClientOptions
             {
-                Transport = new HttpClientTransport(await httpClientCache.Get(nameof(QueueServiceClient)))
+                Transport = new HttpClientTransport(await httpClientCache.Get(nameof(QueueServiceClient)).NoSync())
             };
-
-            var connectionString = config.GetValueStrict<string>("Azure:Storage:Queue:ConnectionString");
 
             var client = new QueueServiceClient(connectionString, clientOptions);
 
