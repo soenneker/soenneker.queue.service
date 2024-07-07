@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core.Pipeline;
 using Azure.Storage.Queues;
@@ -21,13 +23,15 @@ public class QueueServiceUtil : IQueueServiceUtil
     {
         _httpClientCache = httpClientCache;
 
-        _client = new AsyncSingleton<QueueServiceClient>(async () =>
+        _client = new AsyncSingleton<QueueServiceClient>(async (token, _) =>
         {
             var connectionString = config.GetValueStrict<string>("Azure:Storage:Queue:ConnectionString");
 
+            HttpClient httpClient = await httpClientCache.Get(nameof(QueueServiceClient), cancellationToken: token).NoSync();
+
             var clientOptions = new QueueClientOptions
             {
-                Transport = new HttpClientTransport(await httpClientCache.Get(nameof(QueueServiceClient)).NoSync())
+                Transport = new HttpClientTransport(httpClient)
             };
 
             var client = new QueueServiceClient(connectionString, clientOptions);
@@ -36,9 +40,9 @@ public class QueueServiceUtil : IQueueServiceUtil
         });
     }
 
-    public ValueTask<QueueServiceClient> Get()
+    public ValueTask<QueueServiceClient> Get(CancellationToken cancellationToken = default)
     {
-        return _client.Get();
+        return _client.Get(cancellationToken);
     }
 
     public async ValueTask DisposeAsync()
