@@ -32,7 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\src\Soenneker.Queue.Service.csproj" />
+        <ProjectReference Include="..\..\src\Soenneker.Queue.Service.csproj" />
     </ItemGroup>
 
 </Project>
