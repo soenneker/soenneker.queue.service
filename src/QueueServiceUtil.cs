@@ -34,9 +34,7 @@ public class QueueServiceUtil : IQueueServiceUtil
                 Transport = new HttpClientTransport(httpClient)
             };
 
-            var client = new QueueServiceClient(connectionString, clientOptions);
-
-            return client;
+            return new QueueServiceClient(connectionString, clientOptions);
         });
     }
 
