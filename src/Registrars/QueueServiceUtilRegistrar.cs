@@ -15,14 +15,16 @@ public static class QueueServiceUtilRegistrar
     /// </summary>
     public static IServiceCollection AddQueueServiceUtilAsSingleton(this IServiceCollection services)
     {
-        services.AddHttpClientCacheAsSingleton().TryAddSingleton<IQueueServiceUtil, QueueServiceUtil>();
+        services.AddHttpClientCacheAsSingleton()
+                .TryAddSingleton<IQueueServiceUtil, QueueServiceUtil>();
 
         return services;
     }
 
     public static IServiceCollection AddQueueServiceUtilAsScoped(this IServiceCollection services)
     {
-        services.AddHttpClientCacheAsSingleton().TryAddScoped<IQueueServiceUtil, QueueServiceUtil>();
+        services.AddHttpClientCacheAsSingleton()
+                .TryAddScoped<IQueueServiceUtil, QueueServiceUtil>();
 
         return services;
     }
