@@ -14,7 +14,7 @@ using Soenneker.Utils.HttpClientCache.Abstract;
 namespace Soenneker.Queue.Service;
 
 ///<inheritdoc cref="IQueueServiceUtil"/>
-public class QueueServiceUtil : IQueueServiceUtil
+public sealed class QueueServiceUtil : IQueueServiceUtil
 {
     private readonly IHttpClientCache _httpClientCache;
     private readonly AsyncSingleton<QueueServiceClient> _client;
@@ -45,8 +45,6 @@ public class QueueServiceUtil : IQueueServiceUtil
 
     public async ValueTask DisposeAsync()
     {
-        GC.SuppressFinalize(this);
-
         await _httpClientCache.Remove(nameof(QueueServiceClient)).NoSync();
 
         await _client.DisposeAsync().NoSync();
@@ -54,8 +52,6 @@ public class QueueServiceUtil : IQueueServiceUtil
 
     public void Dispose()
     {
-        GC.SuppressFinalize(this);
-
         _httpClientCache.RemoveSync(nameof(QueueServiceClient));
 
         _client.Dispose();
