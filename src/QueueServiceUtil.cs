@@ -23,7 +23,7 @@ public sealed class QueueServiceUtil : IQueueServiceUtil
     {
         _httpClientCache = httpClientCache;
 
-        _client = new AsyncSingleton<QueueServiceClient>(async (token, _) =>
+        _client = new AsyncSingleton<QueueServiceClient>(async token =>
         {
             var connectionString = config.GetValueStrict<string>("Azure:Storage:Queue:ConnectionString");
 
