@@ -17,25 +17,29 @@ namespace Soenneker.Queue.Service;
 public sealed class QueueServiceUtil : IQueueServiceUtil
 {
     private readonly IHttpClientCache _httpClientCache;
+    private readonly IConfiguration _config;
     private readonly AsyncSingleton<QueueServiceClient> _client;
 
     public QueueServiceUtil(IConfiguration config, IHttpClientCache httpClientCache)
     {
+        _config = config;
         _httpClientCache = httpClientCache;
 
-        _client = new AsyncSingleton<QueueServiceClient>(async token =>
+        _client = new AsyncSingleton<QueueServiceClient>(CreateClient);
+    }
+
+    private async ValueTask<QueueServiceClient> CreateClient(CancellationToken token)
+    {
+        var connectionString = _config.GetValueStrict<string>("Azure:Storage:Queue:ConnectionString");
+
+        HttpClient httpClient = await _httpClientCache.Get(nameof(QueueServiceClient), cancellationToken: token).NoSync();
+
+        var clientOptions = new QueueClientOptions
         {
-            var connectionString = config.GetValueStrict<string>("Azure:Storage:Queue:ConnectionString");
+            Transport = new HttpClientTransport(httpClient)
+        };
 
-            HttpClient httpClient = await httpClientCache.Get(nameof(QueueServiceClient), cancellationToken: token).NoSync();
-
-            var clientOptions = new QueueClientOptions
-            {
-                Transport = new HttpClientTransport(httpClient)
-            };
-
-            return new QueueServiceClient(connectionString, clientOptions);
-        });
+        return new QueueServiceClient(connectionString, clientOptions);
     }
 
     public ValueTask<QueueServiceClient> Get(CancellationToken cancellationToken = default)
