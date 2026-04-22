@@ -1,20 +1,19 @@
 using Soenneker.Queue.Service.Abstract;
-using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.Queue.Service.Tests;
 
-[Collection("Collection")]
-public class QueueServiceUtilTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public class QueueServiceUtilTests : HostedUnitTest
 {
     private readonly IQueueServiceUtil _util;
 
-    public QueueServiceUtilTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public QueueServiceUtilTests(Host host) : base(host)
     {
         _util = Resolve<IQueueServiceUtil>(true);
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
 
