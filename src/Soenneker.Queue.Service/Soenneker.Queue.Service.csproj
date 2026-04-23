@@ -41,17 +41,9 @@
         <None Include="..\..\icon.png" Pack="true" PackagePath="\" />
     </ItemGroup>
 
-<<<<<<< HEAD
-    <ItemGroup>
-        <PackageReference Include="Azure.Storage.Queues" Version="12.25.0" />
-        <PackageReference Include="Soenneker.Extensions.Configuration" Version="4.0.814" />
-        <PackageReference Include="Soenneker.Utils.HttpClientCache" Version="4.0.1930" />
-    </ItemGroup>
-=======
 	<ItemGroup>
 		<PackageReference Include="Azure.Storage.Queues" Version="12.25.0" />
 		<PackageReference Include="Soenneker.Extensions.Configuration" Version="4.0.816" />
 		<PackageReference Include="Soenneker.Utils.HttpClientCache" Version="4.0.1934" />
 	</ItemGroup>
->>>>>>> 218ec18ecfc69c3af888814b2d3c40ea0f41d72e
 </Project>
