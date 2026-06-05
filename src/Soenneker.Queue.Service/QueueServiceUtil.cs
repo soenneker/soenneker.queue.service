@@ -47,6 +47,10 @@ public sealed class QueueServiceUtil : IQueueServiceUtil
         return _client.Get(cancellationToken);
     }
 
+    /// <summary>
+    /// Asynchronously releases resources used by the current instance.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async ValueTask DisposeAsync()
     {
         await _httpClientCache.Remove(nameof(QueueServiceClient)).NoSync();
@@ -54,6 +58,9 @@ public sealed class QueueServiceUtil : IQueueServiceUtil
         await _client.DisposeAsync().NoSync();
     }
 
+    /// <summary>
+    /// Releases resources used by the current instance.
+    /// </summary>
     public void Dispose()
     {
         _httpClientCache.RemoveSync(nameof(QueueServiceClient));
