@@ -13,6 +13,8 @@ public static class QueueServiceUtilRegistrar
     /// <summary>
     /// Recommended
     /// </summary>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddQueueServiceUtilAsSingleton(this IServiceCollection services)
     {
         services.AddHttpClientCacheAsSingleton()
@@ -22,10 +24,10 @@ public static class QueueServiceUtilRegistrar
     }
 
     /// <summary>
-    /// Adds queue service util as scoped.
+    /// Registers Queue Service Util with a scoped lifetime.
     /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddQueueServiceUtilAsScoped(this IServiceCollection services)
     {
         services.AddHttpClientCacheAsSingleton()
