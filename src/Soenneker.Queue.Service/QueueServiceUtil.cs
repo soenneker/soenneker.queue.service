@@ -13,7 +13,6 @@ using Soenneker.Utils.HttpClientCache.Abstract;
 
 namespace Soenneker.Queue.Service;
 
-/// <inheritdoc cref="IQueueServiceUtil"/>
 public sealed class QueueServiceUtil : IQueueServiceUtil
 {
     private readonly IHttpClientCache _httpClientCache;
@@ -47,24 +46,13 @@ public sealed class QueueServiceUtil : IQueueServiceUtil
         return _client.Get(cancellationToken);
     }
 
-    /// <summary>
-    /// Asynchronously releases resources used by the current instance.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation.</returns>
     public async ValueTask DisposeAsync()
     {
-        await _httpClientCache.Remove(nameof(QueueServiceClient)).NoSync();
-
         await _client.DisposeAsync().NoSync();
     }
 
-    /// <summary>
-    /// Releases resources used by the current instance.
-    /// </summary>
     public void Dispose()
     {
-        _httpClientCache.RemoveSync(nameof(QueueServiceClient));
-
         _client.Dispose();
     }
 }

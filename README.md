@@ -1,11 +1,14 @@
 [![](https://img.shields.io/nuget/v/Soenneker.Queue.Service.svg?style=for-the-badge)](https://www.nuget.org/packages/Soenneker.Queue.Service/)
 [![](https://img.shields.io/github/actions/workflow/status/soenneker/soenneker.queue.service/publish-package.yml?style=for-the-badge)](https://github.com/soenneker/soenneker.queue.service/actions/workflows/publish-package.yml)
+[![](https://img.shields.io/github/actions/workflow/status/soenneker/soenneker.queue.service/build-and-test.yml?label=Build&style=for-the-badge)](https://github.com/soenneker/soenneker.queue.service/actions/workflows/build-and-test.yml)
 [![](https://img.shields.io/nuget/dt/Soenneker.Queue.Service.svg?style=for-the-badge)](https://www.nuget.org/packages/Soenneker.Queue.Service/)
 [![](https://img.shields.io/github/actions/workflow/status/soenneker/soenneker.queue.service/codeql.yml?label=CodeQL&style=for-the-badge)](https://github.com/soenneker/soenneker.queue.service/actions/workflows/codeql.yml)
 
 # Soenneker.Queue.Service
 
-A utility library for Azure Queue (Storage) service client (QueueServiceClient) accessibility Singleton IoC recommended.
+Provides a lazily created, cached Azure Queue Storage `QueueServiceClient` through dependency injection.
+
+Use this package for account-level operations such as listing queues and retrieving service properties. Use `Soenneker.Queue.Client` when code needs a client for a named queue.
 
 ## Install
 
@@ -13,31 +16,60 @@ A utility library for Azure Queue (Storage) service client (QueueServiceClient) 
 dotnet add package Soenneker.Queue.Service
 ```
 
-## Quick start
+## Configuration
+
+```json
+{
+  "Azure": {
+    "Storage": {
+      "Queue": {
+        "ConnectionString": "<Azure Storage connection string>"
+      }
+    }
+  }
+}
+```
+
+The connection string is read the first time the service client is requested and remains associated with that utility instance.
+
+## Registration
 
 ```csharp
 using Soenneker.Queue.Service.Registrars;
-using Microsoft.Extensions.DependencyInjection;
 
-var services = new ServiceCollection();
-var result = services.AddQueueServiceUtilAsSingleton();
+builder.Services.AddQueueServiceUtilAsSingleton();
 ```
 
-Recommended.
+Singleton registration shares the lazily created `QueueServiceClient` across the application. Scoped registration is available when the wrapper must follow a request or operation scope:
 
-## What you get
+```csharp
+builder.Services.AddQueueServiceUtilAsScoped();
+```
 
-- `IQueueServiceUtil` — A utility library for Azure Queue (Storage) service client (QueueServiceClient) accessibility Singleton IoC recommended.
-- `QueueServiceUtilRegistrar` — A utility library for Azure Queue (Storage) service accessibility.
+The HTTP transport cache remains singleton-owned with either registration. Disposing a scoped wrapper does not evict the transport used by other scopes.
 
-## API at a glance
+Both registration methods use `TryAdd`; an existing `IQueueServiceUtil` registration is preserved.
 
-| API | What it does | Result / important behavior |
-| --- | --- | --- |
-| `QueueServiceUtilRegistrar.AddQueueServiceUtilAsSingleton(services)` | Recommended. | The same service collection, so additional registrations can be chained. |
-| `QueueServiceUtilRegistrar.AddQueueServiceUtilAsScoped(services)` | Registers Queue Service Util with a scoped lifetime. | The same service collection, so additional registrations can be chained. |
+## Usage
 
-## Practical notes
+```csharp
+using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
+using Soenneker.Queue.Service.Abstract;
 
-- Calls that return a cached or singleton value reuse the same instance until the owning service is disposed.
-- Dispose instances you own when their scope ends so held resources can be released.
+public sealed class QueueCatalog(IQueueServiceUtil queueService)
+{
+    public async Task<List<string>> List(CancellationToken cancellationToken)
+    {
+        QueueServiceClient client = await queueService.Get(cancellationToken);
+        var names = new List<string>();
+
+        await foreach (QueueItem queue in client.GetQueuesAsync(cancellationToken: cancellationToken))
+            names.Add(queue.Name);
+
+        return names;
+    }
+}
+```
+
+The DI container owns registered utilities. Application code should not dispose an injected instance manually.

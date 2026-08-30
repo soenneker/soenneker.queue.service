@@ -7,16 +7,15 @@ using Azure.Storage.Queues;
 namespace Soenneker.Queue.Service.Abstract;
 
 /// <summary>
-/// A utility library for Azure Queue (Storage) service client (QueueServiceClient) accessibility <para/>
-/// Singleton IoC recommended
+/// Provides a lazily created Azure Queue Storage service client.
 /// </summary>
 public interface IQueueServiceUtil : IDisposable, IAsyncDisposable
 {
     /// <summary>
-    /// Returns the configured queue Service Client used by the Queue Service.
+    /// Gets the configured queue service client.
     /// </summary>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>A task whose result is the requested queue Service Client.</returns>
+    /// <param name="cancellationToken">A token to cancel initial client creation.</param>
+    /// <returns>The cached queue service client.</returns>
     [Pure]
     ValueTask<QueueServiceClient> Get(CancellationToken cancellationToken = default);
 }
