@@ -13,6 +13,7 @@ using Soenneker.Utils.HttpClientCache.Abstract;
 
 namespace Soenneker.Queue.Service;
 
+/// <inheritdoc cref="IQueueServiceUtil" />
 public sealed class QueueServiceUtil : IQueueServiceUtil
 {
     private readonly IHttpClientCache _httpClientCache;
