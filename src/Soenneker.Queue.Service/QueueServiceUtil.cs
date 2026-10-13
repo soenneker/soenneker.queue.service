@@ -30,7 +30,7 @@ public sealed class QueueServiceUtil : IQueueServiceUtil
 
     private async ValueTask<QueueServiceClient> CreateClient(CancellationToken token)
     {
-        var connectionString = _config.GetValueStrict<string>("Azure:Storage:Queue:ConnectionString");
+        var connectionString = _config.GetStringStrict("Azure:Storage:Queue:ConnectionString");
 
         HttpClient httpClient = await _httpClientCache.Get(nameof(QueueServiceClient), cancellationToken: token).NoSync();
 
